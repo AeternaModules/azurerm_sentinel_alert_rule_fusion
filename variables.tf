@@ -19,13 +19,13 @@ EOT
   type = map(object({
     alert_rule_template_guid   = string
     log_analytics_workspace_id = string
-    enabled                    = optional(bool, true)
-    name                       = optional(string, "BuiltInFusion")
+    enabled                    = optional(bool)   # Default: true
+    name                       = optional(string) # Default: "BuiltInFusion"
     source = optional(object({
-      enabled = optional(bool, true)
+      enabled = optional(bool) # Default: true
       name    = string
       sub_type = optional(object({
-        enabled            = optional(bool, true)
+        enabled            = optional(bool) # Default: true
         name               = string
         severities_allowed = set(string)
       }))
