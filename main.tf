@@ -7,12 +7,12 @@ resource "azurerm_sentinel_alert_rule_fusion" "sentinel_alert_rule_fusions" {
   name                       = each.value.name
 
   dynamic "source" {
-    for_each = each.value.source != null ? [each.value.source] : []
+    for_each = each.value.source != null ? each.value.source : []
     content {
       enabled = source.value.enabled
       name    = source.value.name
       dynamic "sub_type" {
-        for_each = source.value.sub_type != null ? [source.value.sub_type] : []
+        for_each = source.value.sub_type != null ? source.value.sub_type : []
         content {
           enabled            = sub_type.value.enabled
           name               = sub_type.value.name
