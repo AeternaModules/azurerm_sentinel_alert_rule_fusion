@@ -31,24 +31,30 @@ EOT
       })))
     })))
   }))
-  # --- Unconfirmed validation candidates, derived from azurerm_sentinel_alert_rule_fusion's provider source ---
-  # Not auto-enabled: either a bespoke provider validator we can't safely translate,
-  # or a path that crosses a list-typed block (needs its own for_each wrapping).
-  # Review, translate into a real validation{} block above, and delete once confirmed.
-  # path: log_analytics_workspace_id
-  #   source:    [from alertrules.ValidateWorkspaceID] !ok
-  # path: log_analytics_workspace_id
-  #   source:    [from alertrules.ValidateWorkspaceID] err != nil
-  # path: alert_rule_template_guid
-  #   condition: can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", value))
-  #   message:   must be a valid UUID
-  # path: source.name
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: source.sub_type.name
-  #   condition: length(value) > 0
-  #   message:   must not be empty
-  # path: source.sub_type.severities_allowed[*]
-  #   source:    validation.StringInSlice value list is not a literal []string - likely a generated PossibleValuesFor*() helper; resolve separately
+  validation {
+    condition = alltrue([
+      for k, v in var.sentinel_alert_rule_fusions : (
+        can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", v.alert_rule_template_guid))
+      )
+    ])
+    error_message = "must be a valid UUID"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.sentinel_alert_rule_fusions : (
+        v.source == null || alltrue([for item in v.source : (length(item.name) > 0)])
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  validation {
+    condition = alltrue([
+      for k, v in var.sentinel_alert_rule_fusions : (
+        v.source == null || alltrue([for item in v.source : (item.sub_type == null || alltrue([for item in item.sub_type : (length(item.name) > 0)]))])
+      )
+    ])
+    error_message = "must not be empty"
+  }
+  # Note: 3 additional provider-side validators are enforced at apply time but not mirrored as validation{} blocks here (bespoke or non-mechanically-translatable).
 }
 
